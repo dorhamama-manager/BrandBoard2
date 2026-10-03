@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>מערכת אתחול: מיתוג מחדש לקהילת העלית</title>
+    <!-- הוספת פונטים: Teko לכותרות הסייבר, Share Tech Mono לאנגלית, ו-Heebo לטקסט הרץ -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Heebo:wght@300;400;700&family=Teko:wght@500;700&display=swap');
+
+        :root {
+            --primary-color: #00ffcc;
+            --bg-color: #050a0f;
+            --card-bg: rgba(5, 10, 15, 0.7);
+            --border-color: #00ffcc;
+            --text-glow: 0 0 15px var(--primary-color);
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Heebo', sans-serif;
+            background-color: var(--bg-color);
+            color: #ffffff;
+            min-height: 100vh;
+            /* מעבר חלק במיוחד להחלפת התמונות */
+            transition: background-image 1s ease-in-out, background-color 1s ease;
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            position: relative;
+        }
+
+        /* שכבת הצללה כהה ששומרת על הטקסט קריא ונותנת תחושת מערכת הפעלה */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(0,0,0,0.9) 0%, rgba(0,20,30,0.85) 100%);
+            z-index: -1;
+            transition: background 1s ease;
+        }
+
+        /* אפקט פסי סריקה של מסך ישן/סייבר */
+        .scanlines {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 0, 0, 0.15),
+                rgba(0, 0, 0, 0.15) 1px,
+                transparent 1px,
+                transparent 2px
+            );
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        header {
+            text-align: center;
+            padding: 3rem 1rem 1rem;
+            border-bottom: 1px solid var(--border-color);
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(8px);
+            transition: border-color 0.8s ease;
+        }
+
+        /* כותרת ראשית בפונט סייבר מרובע */
+        h1 {
+            font-family: 'Teko', sans-serif;
+            color: var(--primary-color);
+            text-shadow: var(--text-glow);
+            margin: 0 0 5px;
+            font-size: 3.5rem;
+            letter-spacing: 1px;
+            line-height: 1.1;
+            transition: color 0.8s ease, text-shadow 0.8s ease;
+        }
+
+        header p {
+            font-size: 1.2rem;
+            color: #cccccc;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .sys-status {
+            font-family: 'Share Tech Mono', monospace;
+            color: #ff0055;
+            font-size: 1rem;
+            margin-top: 15px;
+            text-shadow: 0 0 5px #ff0055;
+            animation: blink 2s infinite;
+            letter-spacing: 1px;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 40px auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            padding: 0 20px;
+            padding-bottom: 50px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-right: 4px solid var(--primary-color);
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .card:hover {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+            transform: translateY(-5px);
+        }
+
+        .card-title {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 2rem;
+            color: var(--primary-color);
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: color 0.8s ease;
+        }
+
+        .card-title::before {
+            content: ">_";
+            font-size: 1.4rem;
+            opacity: 0.5;
+        }
+
+        .card-content {
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            transition: all 0.5s ease-in-out;
+            margin-top: 0;
+        }
+
+        .card.active .card-content {
+            max-height: 400px;
+            opacity: 1;
+            margin-top: 15px;
+            border-top: 1px dashed rgba(255,255,255,0.3);
+            padding-top: 15px;
+        }
+
+        .card.active {
+            background: rgba(0, 0, 0, 0.85);
+            border-color: var(--primary-color);
+            box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(255,255,255,0.2);
+            transform: scale(1.02);
+        }
+
+        .reasoning {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: #eeeeee;
+            margin-bottom: 15px;
+        }
+
+        .tagline {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 1.1rem;
+            color: #fff;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 12px;
+            border-right: 4px solid var(--primary-color);
+            direction: ltr;
+            text-align: left;
+            transition: border-color 0.8s ease;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            h1 { font-size: 2.5rem; }
+            .card-title { font-size: 1.6rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="overlay" id="main-overlay"></div>
+    <div class="scanlines"></div>
+
+    <header id="main-header">
+        <h1>[ RE:BRAND ] אקוסיסטם הפאונדרים</h1>
+        <p>ניתוק מתשתיות העבר. מעבר לתשתית עלית חדשה.<br>המטרה: לבחור שם המשדר בנייה, עשייה, וסביבה שנותנת כלים ליצירת ערך.</p>
+        <div class="sys-status" id="sys-status">STATUS: AWAITING SELECTION...</div>
+    </header>
+
+    <main class="container" id="cards-container">
+        <!-- Cards injected via JS -->
+    </main>
+
+    <script>
+        const namesData = [
+            {
+                name: "Forge",
+                reasoning: "כבשן. המטאפורה שנותנת השראה לכל השאר: המקום שבו מתכת מעוצבת תחת חום ולחץ כדי לבנות משהו חזק ושימושי יותר. FORGE הוא הסביבה בה היזמים בונים, צומחים ומצליחים, בעוד הקהילה מספקת את התשתיות, הכלים והקשרים הנדרשים ליצירה.",
+                tagline: "FORGE — where founders build, grow and thrive.",
+                themeColor: "#ff4500", // צבע אש/כתום-אדום
+                bgUrl: "https://images.unsplash.com/photo-1504938634563-7eb54dbd8095?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80", // תמונת כבשן אש
+                overlay: "linear-gradient(135deg, rgba(30,5,0,0.95) 0%, rgba(50,15,0,0.85) 100%)"
+            },
+            {
+                name: "Apex",
+                reasoning: "קודקוד או פסגה. הנקודה העליונה ביותר שאליה מתכנסים. מתכתב עם השאיפה למצוינות, רמת האקסקלוסיביות של הקבוצה (יוצאי יחידות עלית) והעובדה שזהו מפגש של פאונדרים הנמצאים בקצה העליון של הפירמידה הטכנולוגית.",
+                tagline: "APEX — Where the top tier convenes to build.",
+                themeColor: "#00d4ff", // צבע קרח/תכלת זוהר
+                bgUrl: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80", // הר עם פסגה מושלגת
+                overlay: "linear-gradient(135deg, rgba(0,10,25,0.95) 0%, rgba(0,30,50,0.8) 100%)"
+            },
+            {
+                name: "Turbine",
+                reasoning: "טורבינה: מנוע שממיר זרימה גולמית (רוח או מים) לאנרגיה שימושית המניעה מערכות. הקהילה מתפקדת כמנגנון שלוקח את הזרם האדיר של טאלנטים מ-8200 ומצו״ב, וממיר אותו לכוח עבודה יזמי וסטארטאפים חיים.",
+                tagline: "TURBINE — Converting raw talent into unstoppable momentum.",
+                themeColor: "#33ff77", // ירוק נאון / טבע
+                bgUrl: "https://images.unsplash.com/photo-1532601224476-15c79f2f7a51?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80", // טורבינות רוח על גבעות דשא
+                overlay: "linear-gradient(135deg, rgba(5,20,10,0.95) 0%, rgba(15,40,20,0.8) 100%)"
+            },
+            {
+                name: "Keystone",
+                reasoning: "אבן הראשה: האבן המרכזית והאחרונה בקשת אדריכלית, שנועלת את הכל במקום. הקהילה לא בונה את הסטארטאפ עבור היזם, אלא משמשת כאבן הראשה של רשת התמיכה והקשרים שמייצבת את מסע היזמות.",
+                tagline: "KEYSTONE — The structural support for scaling founders.",
+                themeColor: "#ffb700", // זהב/כתום אבן
+                bgUrl: "https://images.unsplash.com/photo-1601002235941-032f3006ad59?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80", // קשת אבן עתיקה
+                overlay: "linear-gradient(135deg, rgba(20,10,0,0.95) 0%, rgba(40,20,5,0.85) 100%)"
+            },
+            {
+                name: "Catalyst",
+                reasoning: "זרז (בכימיה): חומר שמאיץ תגובות ותהליכים מבלי להתכלות. הקהילה מאיצה את צמיחת היזמים וקיצור תהליכי הגיוס, ונשארת יציבה כדי לשרת את החברות הבאות בתור.",
+                tagline: "CATALYST — Accelerating the founders who build the future.",
+                themeColor: "#ff00ff", // מג'נטה/כימיה נאון
+                bgUrl: "https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80", // ריאקציה כימית/מעבדה כהה
+                overlay: "linear-gradient(135deg, rgba(20,0,20,0.95) 0%, rgba(40,0,40,0.8) 100%)"
+            },
+            {
+                name: "Loom",
+                reasoning: "נול אריגה: מכשיר שלוקח חוטים בודדים ומשלב אותם למארג חזק. עבור יזמי סייבר שרגילים לטוות רשתות קוד, המילה מדגישה את הערך של נטוורקינג - שילוב ידע, הון וטאלנט לקהילה אקסקלוסיבית אחת.",
+                tagline: "LOOM — Weaving individual brilliance into an unstoppable network.",
+                themeColor: "#9933ff", // סגול עמוק
+                bgUrl: "https://images.unsplash.com/photo-1518002171953-a080ee817e1f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80", // חוטי פייבר-אופטיקס / טוויה טכנולוגית
+                overlay: "linear-gradient(135deg, rgba(15,0,25,0.95) 0%, rgba(30,0,50,0.8) 100%)"
+            },
+            {
+                name: "Lodestone",
+                reasoning: "אבן שואבת (מצפן טבעי): מגנטיות ששימשה לניווט ספינות במסלול. מעביר שני מסרים: המגנטיות שמושכת את הטאלנטים הטובים ביותר אלינו, והקהילה כמצפן מקצועי (Mentorship) שמכוון אותם ליעד.",
+                tagline: "LODESTONE — Guiding elite founders to their true north.",
+                themeColor: "#0088ff", // כחול מצפן/מגנטי
+                bgUrl: "https://images.unsplash.com/photo-1527066236129-cbaf7f243047?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80", // תמונת מצפן מאירה
+                overlay: "linear-gradient(135deg, rgba(0,10,30,0.95) 0%, rgba(0,25,55,0.8) 100%)"
+            },
+            {
+                name: "Kinetic",
+                reasoning: "אנרגיה קינטית (של תנועה). רעיון בשלב Pre-Fund הוא פוטנציאל בלבד. הקהילה היא המרחב שבו הפוטנציאל מותמר לפעולה ממשית ולמומנטום עסקי מהיר. משדר ביצוע ועשייה ולא רק דיבורים.",
+                tagline: "KINETIC — Turning raw potential into forward momentum.",
+                themeColor: "#ff0066", // ורוד/אדום של מהירות נאון
+                bgUrl: "https://images.unsplash.com/photo-1494697536454-6f39e2cc972d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80", // פסי אור/תנועה קינטית בלילה
+                overlay: "linear-gradient(135deg, rgba(25,0,10,0.95) 0%, rgba(45,0,15,0.85) 100%)"
+            },
+            {
+                name: "Fortify",
+                reasoning: "לבצר ולחזק. שורש מעולמות אבטחת המידע, סייבר ובניית תשתיות יציבות. הקהילה מסייעת לפאונדרים בשלבים המוקדמים לבנות חומות, פונדמנטלס וחברה חסינה פיננסית ועסקית לקראת היציאה לשוק.",
+                tagline: "FORTIFY — Building resilient companies from the ground up.",
+                themeColor: "#00e676", // ירוק סייבר מגן
+                bgUrl: "https://images.unsplash.com/photo-1510511459019-5d644d516805?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80", // חומת קוד / מנעול סייבר
+                overlay: "linear-gradient(135deg, rgba(0,20,10,0.95) 0%, rgba(0,40,20,0.85) 100%)"
+            },
+            {
+                name: "Fulcrum",
+                reasoning: "נקודת משען. בפיזיקה, זו הנקודה שעליה נשען מנוף להזזת משקלים אדירים. הקהילה לא עושה את העבודה, אלא משמשת כנקודת המשען הנותנת ליזם את המינוף (Leverage) הדרוש דרך גישה לנטוורק חזק.",
+                tagline: "FULCRUM — The leverage you need to move the market.",
+                themeColor: "#ffe600", // צהוב זוהר / אנרגיה
+                bgUrl: "https://images.unsplash.com/photo-1502920514313-52581002a659?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80", // נוף טבעי עם תחושת מרחב פיזיקלי/שיווי משקל
+                overlay: "linear-gradient(135deg, rgba(20,20,0,0.95) 0%, rgba(40,40,0,0.85) 100%)"
+            }
+        ];
+
+        const container = document.getElementById('cards-container');
+        const overlay = document.getElementById('main-overlay');
+        const sysStatus = document.getElementById('sys-status');
+        const mainHeader = document.getElementById('main-header');
+
+        // Render Cards
+        namesData.forEach((item) => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.innerHTML = `
+                <h2 class="card-title">${item.name}</h2>
+                <div class="card-content">
+                    <p class="reasoning">${item.reasoning}</p>
+                    <div class="tagline">${item.tagline}</div>
+                </div>
+            `;
+            
+            // Interaction logic
+            card.addEventListener('click', function() {
+                const isActive = card.classList.contains('active');
+
+                // Close all cards
+                document.querySelectorAll('.card').forEach(c => {
+                    c.classList.remove('active');
+                    c.style.borderColor = 'rgba(255,255,255,0.1)';
+                    const taglineElement = c.querySelector('.tagline');
+                    if(taglineElement) taglineElement.style.borderColor = 'var(--primary-color)';
+                });
+
+                if(!isActive) {
+                    // Open this card
+                    card.classList.add('active');
+                    
+                    // Update global CSS variable for primary color
+                    document.documentElement.style.setProperty('--primary-color', item.themeColor);
+                    
+                    // Style active card elements
+                    card.style.borderColor = item.themeColor;
+                    card.querySelector('.tagline').style.borderColor = item.themeColor;
+
+                    // Change Background Image
+                    document.body.style.backgroundImage = `url('${item.bgUrl}')`;
+                    
+                    // Change Overlay Gradient
+                    overlay.style.background = item.overlay;
+                    
+                    // Update Header border
+                    mainHeader.style.borderBottomColor = item.themeColor;
+
+                    // Update Status text
+                    sysStatus.style.color = item.themeColor;
+                    sysStatus.style.textShadow = `0 0 5px ${item.themeColor}`;
+                    sysStatus.innerText = `STATUS: ENVIRONMENT INITIALIZED [ ${item.name.toUpperCase()} ]`;
+                } else {
+                    // Revert to default
+                    document.documentElement.style.setProperty('--primary-color', '#00ffcc');
+                    document.body.style.backgroundImage = 'none';
+                    overlay.style.background = 'linear-gradient(135deg, rgba(0,0,0,0.9) 0%, rgba(0,20,30,0.85) 100%)';
+                    mainHeader.style.borderBottomColor = '#00ffcc';
+                    
+                    sysStatus.style.color = '#ff0055';
+                    sysStatus.style.textShadow = '0 0 5px #ff0055';
+                    sysStatus.innerText = 'STATUS: AWAITING SELECTION...';
+                }
+            });
+
+            container.appendChild(card);
+        });
+    </script>
+</body>
+</html>
